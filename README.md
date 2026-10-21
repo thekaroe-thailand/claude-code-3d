@@ -51,6 +51,7 @@ The background server starts by itself the first time a hook fires, is shared by
 | **Summary** | writes the final answer when the turn ends |
 
 - A new prompt starts a new task: the timer restarts and the scout "reads the prompt".
+- While Claude is thinking between tools, the scout shows **Thinking**, so the scene never looks frozen during the longest part of a turn.
 - The team lead walks to whoever just received work and hands over a scroll. The speech bubble shows the tool and a short detail (a file name, a command, a pattern).
 - **Tokens** are counted per task from the session transcript, counting each message once. Hover the number for the cache breakdown. If the transcript cannot be read, the field shows `—`.
 - Several Claude Code sessions can run at once. A **Session** box appears when there is more than one; sessions are never mixed. "Latest" follows whichever session was active last.
@@ -69,6 +70,7 @@ The background server starts by itself the first time a hook fires, is shared by
 ## Troubleshooting
 
 - **Nothing moves.** Make sure `node --version` prints 18 or higher. Run a session with `C3D_DEBUG=1` set and read `~/.claude-code-3d/hook.log`.
+- **See what was received.** Open `http://127.0.0.1:3737/debug/events` for the last 200 events the server got (names only, no paths or prompts). Only Claude Code sessions started after the plugin was installed send events, so open a new chat or session first.
 - **`/claude-code-3d:office` is unknown.** Reload plugins or start a new session. Claude Code always puts the plugin name in front, so `/office` alone does not work.
 - **"This site can't be reached".** The server is not running. Run `/claude-code-3d:office`, or any Claude Code prompt, and it starts. A saved bookmark only works while the server is up.
 - **A role looks stuck on "working".** It is released after ten minutes without events, and when the turn ends. Interrupting a turn can leave it in that state until then.

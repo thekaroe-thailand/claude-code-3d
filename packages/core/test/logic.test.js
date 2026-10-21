@@ -93,6 +93,32 @@ test('reading the prompt ends when the first tool starts', () => {
   assert.deepEqual([s.sessions.a.roles.SA.state, s.sessions.a.roles.SA.tool], ['working', 'Read']);
 });
 
+test('the scout thinks while no tool is busy during a turn', () => {
+  let s = createState();
+  const send = (ev) => {
+    s = reduce(s, { session_id: 'a', ...ev });
+  };
+  send({ event: 'UserPromptSubmit' });
+  send({ event: 'PreToolUse', tool: 'Bash', command: 'ls' });
+  send({ event: 'PostToolUse', tool: 'Bash' });
+  // The tool is done and the model is reading the result.
+  assert.deepEqual([s.sessions.a.roles.SA.state, s.sessions.a.roles.SA.tool], ['working', 'Thinking']);
+  assert.equal(s.sessions.a.roles.Dev.state, 'waiting');
+  // The next tool takes over and the placeholder goes away.
+  send({ event: 'PreToolUse', tool: 'Edit', path: 'a.js' });
+  assert.equal(s.sessions.a.roles.SA.state, 'waiting');
+  assert.equal(s.sessions.a.roles.Dev.state, 'working');
+  // A tool without a role (for example a todo update) leaves the scout thinking.
+  send({ event: 'PostToolUse', tool: 'Edit' });
+  send({ event: 'PreToolUse', tool: 'TodoWrite' });
+  assert.equal(s.sessions.a.roles.SA.tool, 'Thinking');
+  // When the turn ends nobody is left working, and nothing starts thinking after that.
+  send({ event: 'Stop' });
+  assert.ok(Object.values(s.sessions.a.roles).every((r) => r.state !== 'working'));
+  send({ event: 'PostToolUse', tool: 'Bash' });
+  assert.ok(Object.values(s.sessions.a.roles).every((r) => r.state !== 'working'));
+});
+
 test('overlapping tools of one role stay busy until the last one finishes', () => {
   let s = createState();
   const send = (ev) => {

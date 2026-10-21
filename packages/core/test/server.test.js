@@ -66,6 +66,24 @@ test('hook payloads drive the state over HTTP', async () => {
   }
 });
 
+test('recent events are listed by name only', async () => {
+  const { port, close } = await startServer();
+  try {
+    await json(port, '/hook', { hook_event_name: 'UserPromptSubmit', session_id: 'abcdef123456', prompt: 'private text' });
+    await json(port, '/hook', { hook_event_name: 'PreToolUse', session_id: 'abcdef123456', tool_name: 'Bash', tool_input: { command: 'echo SECRETCOMMAND' } });
+    const res = await request(port, { route: '/debug/events' });
+    assert.equal(res.status, 200);
+    const events = JSON.parse(res.text);
+    assert.deepEqual(events.map((e) => [e.event, e.tool, e.session]), [
+      ['UserPromptSubmit', null, 'abcdef12'],
+      ['PreToolUse', 'Bash', 'abcdef12'],
+    ]);
+    assert.ok(!res.text.includes('SECRETCOMMAND') && !res.text.includes('private text'));
+  } finally {
+    await close();
+  }
+});
+
 test('token totals come from the transcript, counted once per message', async () => {
   const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'c3d-cfg-'));
   const previous = process.env.CLAUDE_CONFIG_DIR;

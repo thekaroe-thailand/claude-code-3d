@@ -45,6 +45,14 @@ export function pruneSessions(state, keep = 12) {
   if (state.active && !state.sessions[state.active]) state.active = ids[0] ?? null;
 }
 
+// While a turn is running and no tool is busy, the model is thinking or writing. Nothing reports that,
+// so the scout shows "Thinking" to keep the scene alive instead of looking idle in the longest phase.
+function keepSomeoneBusy(session) {
+  if (!session.startedAt || session.endedAt) return;
+  if (Object.values(session.roles).some((r) => r.state === 'working')) return;
+  session.roles.SA = { state: 'working', tool: 'Thinking', detail: null, done: session.roles.SA.done, running: 0 };
+}
+
 export function reduce(state, ev) {
   const id = ev.session_id ?? 'default';
   const now = Date.now();
@@ -63,8 +71,11 @@ export function reduce(state, ev) {
     }
     case 'PreToolUse': {
       const role = roleForTool(ev.tool, ev.command, ev.subagent_type);
-      // "Reading prompt" is only the first moment of a turn: it ends as soon as the first tool starts.
-      if (session.roles.SA.tool === 'Reading prompt') session.roles.SA = idleRole();
+      // "Reading prompt" and "Thinking" are placeholders: they end as soon as a tool starts.
+      if (session.roles.SA.tool === 'Reading prompt' || session.roles.SA.tool === 'Thinking') {
+        session.roles.SA = { ...idleRole(), done: session.roles.SA.done };
+      }
+      if (!role) keepSomeoneBusy(session);
       if (role) {
         const r = session.roles[role];
         session.roles[role] = {
@@ -85,11 +96,13 @@ export function reduce(state, ev) {
         // Several tools of one role can overlap: stay busy until the last one reports back.
         session.roles[role] = running > 0 ? { ...r, running } : { ...r, state: 'waiting', tool: null, detail: null, running: 0 };
       }
+      keepSomeoneBusy(session);
       break;
     }
     case 'SubagentStop': {
       const role = ev.role ?? roleForAgentType(ev.agent_type);
       session.roles[role] = { ...session.roles[role], state: 'waiting', tool: null, detail: null, done: true, running: 0 };
+      keepSomeoneBusy(session);
       break;
     }
     case 'Stop': {

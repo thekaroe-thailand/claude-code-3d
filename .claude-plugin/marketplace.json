@@ -9,7 +9,7 @@
       "name": "claude-code-3d",
       "source": ".",
       "description": "Watch what Claude Code is doing as a live 3D scene. Local only, read only.",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "category": "monitoring",
       "tags": [
         "visualization",

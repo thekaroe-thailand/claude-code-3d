@@ -106,8 +106,14 @@ export function startServer({ port = 0, preferredPort = null, idleExitMs = 0, on
 
   // ----- events -----
 
+  // The last events received, newest last. Names only (no paths, commands or prompts): used to see what
+  // Claude Code actually sent when the scene does not look right.
+  const recent = [];
+
   function applyEvent(ev) {
     lastActivity = Date.now();
+    recent.push({ at: new Date().toISOString(), event: ev.event, tool: ev.tool ?? null, session: String(ev.session_id).slice(0, 8) });
+    if (recent.length > 200) recent.shift();
     trackTranscript(ev.session_id, ev.transcript_path);
     state = reduce(state, ev);
     pruneSessions(state);
@@ -172,6 +178,11 @@ export function startServer({ port = 0, preferredPort = null, idleExitMs = 0, on
 
     if (req.method === 'GET' && url.pathname === '/health') {
       send(res, 200, JSON.stringify({ ok: true, name: 'claude-code-3d', pid: process.pid, port: actualPort }));
+      return;
+    }
+
+    if (req.method === 'GET' && url.pathname === '/debug/events') {
+      send(res, 200, JSON.stringify(recent));
       return;
     }
 

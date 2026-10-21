@@ -1102,7 +1102,7 @@ function planLeadWork(next) {
   for (const role of ROLES) {
     const r = session.roles[role.id];
     const p = (!newTask && previous.roles?.[role.id]) || EMPTY_ROLE;
-    if (r.state === 'working' && (p.state !== 'working' || p.tool !== r.tool || p.detail !== r.detail)) {
+    if (r.state === 'working' && r.tool !== 'Thinking' && (p.state !== 'working' || p.tool !== r.tool || p.detail !== r.detail)) {
       enqueue({ type: 'assign', role: role.id, tool: r.tool, detail: r.detail });
     } else if (role.id === 'Summary' && r.state === 'done' && p.state !== 'done') {
       enqueue({ type: 'wrapUp', role: role.id });
