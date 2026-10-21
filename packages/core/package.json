@@ -1,0 +1,20 @@
+{
+  "name": "claude-code-3d",
+  "version": "0.1.0",
+  "description": "3D office that shows what Claude Code is doing in real time",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node src/cli.js",
+    "demo": "node scripts/demo.js",
+    "test": "node --test \"test/*.test.js\"",
+    "vendor": "node scripts/vendor.mjs"
+  },
+  "devDependencies": {
+    "three": "^0.186.1"
+  }
+}

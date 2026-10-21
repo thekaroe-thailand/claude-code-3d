@@ -1,0 +1,17 @@
+{
+  "name": "claude-code-3d",
+  "version": "0.1.0",
+  "description": "Watch what Claude Code is doing as a live 3D scene: a team lead hands out tasks to a scout, a developer, a tester and a summariser. Local only, read only.",
+  "author": {
+    "name": "kob ai"
+  },
+  "license": "MIT",
+  "keywords": [
+    "visualization",
+    "3d",
+    "hooks",
+    "monitor"
+  ],
+  "homepage": "https://github.com/thekaroe-thailand/claude-code-3d",
+  "repository": "https://github.com/thekaroe-thailand/claude-code-3d"
+}

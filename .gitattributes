@@ -1,0 +1,4 @@
+# Keep line endings the same on every machine; a Windows batch file needs CRLF.
+* text=auto eol=lf
+*.bat text eol=crlf
+*.png binary

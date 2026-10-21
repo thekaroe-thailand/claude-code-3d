@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Claude Code 3D</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/style.css">
+  <script type="importmap">
+    { "imports": { "three": "/vendor/three.module.js", "three/addons/": "/vendor/addons/" } }
+  </script>
+</head>
+<body>
+  <header id="pipeline">
+    <div class="step" data-role="SA"><span class="name">SA</span><span class="state">Waiting</span></div>
+    <span class="arrow">→</span>
+    <div class="step" data-role="Dev"><span class="name">Dev</span><span class="state">Waiting</span></div>
+    <span class="arrow">→</span>
+    <div class="step" data-role="Tester"><span class="name">Tester</span><span class="state">Waiting</span></div>
+    <span class="arrow">→</span>
+    <div class="step" data-role="Summary"><span class="name">Summary</span><span class="state">Waiting</span></div>
+  </header>
+
+  <div id="scene"></div>
+  <div id="tags"></div>
+
+  <footer id="hud">
+    <div class="stat"><span class="label">Elapsed</span><span id="elapsed">00:00</span></div>
+    <div class="stat"><span class="label">Tokens in / out</span><span id="tokens">—</span></div>
+    <div class="progress"><div id="progress-bar"></div></div>
+    <button id="reset" type="button">Reset</button>
+  </footer>
+
+  <script type="module">
+    import { THEMES, pickTheme, mountChrome } from '/themes.js';
+
+    const id = pickTheme();
+    document.body.dataset.theme = id;
+    mountChrome(id);
+    await import(THEMES.find((theme) => theme.id === id).module);
+  </script>
+</body>
+</html>

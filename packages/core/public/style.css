@@ -1,0 +1,425 @@
+:root {
+  --bg: #f5f4ef;
+  --fg: #1d1d1b;
+  --muted: #7a7a72;
+  --panel: rgba(255, 255, 255, 0.85);
+  --border: #d8d6cc;
+  --sa: #4a7dff;
+  --dev: #20a7a0;
+  --tester: #ef8a2e;
+  --summary: #e0559a;
+  --done: #2e9e5b;
+}
+
+:root:not([data-theme="light"]) {
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #15161a;
+    --fg: #ececea;
+    --muted: #9a9a92;
+    --panel: rgba(30, 31, 36, 0.85);
+    --border: #33353c;
+    --done: #3fbf74;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #15161a;
+  --fg: #ececea;
+  --muted: #9a9a92;
+  --panel: rgba(30, 31, 36, 0.85);
+  --border: #33353c;
+  --done: #3fbf74;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+#scene {
+  position: absolute;
+  inset: 0;
+}
+
+#pipeline {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  z-index: 2;
+  max-width: calc(100% - 32px);
+  justify-content: center;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 72px;
+  padding: 4px 10px;
+  border-radius: 10px;
+  border: 2px solid transparent;
+}
+
+.step .name {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.step .state {
+  font-size: 12px;
+  color: var(--muted);
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.step.working { border-color: currentColor; }
+.step.done .state { color: var(--done); }
+
+.step[data-role="SA"] { color: var(--sa); }
+.step[data-role="Dev"] { color: var(--dev); }
+.step[data-role="Tester"] { color: var(--tester); }
+.step[data-role="Summary"] { color: var(--summary); }
+
+.arrow {
+  color: var(--muted);
+}
+
+#tags {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.tag {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  background: var(--panel);
+  border: 1px solid var(--border);
+}
+
+.tag .done-tick {
+  color: var(--done);
+  font-weight: 700;
+  margin-left: 4px;
+}
+
+.tag {
+  left: 0;
+  top: 0;
+}
+
+.tag.lead {
+  background: #1f3a5f;
+  color: #ffffff;
+  border-color: #6f93c9;
+  font-weight: 600;
+}
+
+.bubble {
+  position: absolute;
+  left: 0;
+  top: 0;
+  max-width: 260px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: var(--bubble-bg, #ffffff);
+  color: var(--bubble-fg, #1d1d1b);
+  border: 2px solid #1f3a5f;
+  font-size: 13px;
+  line-height: 1.35;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.bubble.show {
+  opacity: 1;
+}
+
+.bubble::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -9px;
+  width: 14px;
+  height: 14px;
+  background: var(--bubble-bg, #ffffff);
+  border-style: solid;
+  border-width: 2px 0 0 2px;
+  border-color: inherit;
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.bubble .line2 {
+  margin-top: 2px;
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 11px;
+  color: #5c5c55;
+}
+
+#hud {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 10px 16px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  z-index: 2;
+  max-width: calc(100% - 32px);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+}
+
+.label {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.progress {
+  width: 140px;
+  height: 8px;
+  background: var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+#progress-bar {
+  height: 100%;
+  width: 0;
+  background: var(--done);
+  transition: width 0.3s ease;
+}
+
+button {
+  font: inherit;
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--fg);
+  cursor: pointer;
+}
+
+@media (max-width: 600px) {
+  #hud {
+    gap: 10px;
+  }
+  .progress {
+    width: 80px;
+  }
+}
+
+/* Samurai theme: lacquer black, gold trim, vermilion and washi paper. */
+[data-theme="samurai"] {
+  --bg: #120d0b;
+  --fg: #f1e6d0;
+  --muted: #a8977e;
+  --panel: rgba(28, 19, 15, 0.88);
+  --border: #7a5a2c;
+  --done: #7bc47f;
+  --sa: #6f93e6;
+  --dev: #ea6a4a;
+  --tester: #e6b04a;
+  --summary: #c58ae6;
+  --bubble-bg: #f3e7c9;
+  --bubble-fg: #2a1d14;
+}
+
+[data-theme="samurai"] .step .name,
+[data-theme="samurai"] .label,
+[data-theme="samurai"] #elapsed {
+  font-family: "Yu Mincho", "Hiragino Mincho ProN", "MS Mincho", "Noto Serif JP", serif;
+}
+
+[data-theme="samurai"] #pipeline,
+[data-theme="samurai"] #hud {
+  border-color: #b8923f;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5), 0 6px 18px rgba(0, 0, 0, 0.45);
+}
+
+[data-theme="samurai"] .tag {
+  background: rgba(24, 16, 12, 0.9);
+  color: #f1e6d0;
+}
+
+[data-theme="samurai"] .tag.lead {
+  background: #5b1a14;
+  color: #f6e3b4;
+  border-color: #d4a84b;
+}
+
+[data-theme="samurai"] .bubble {
+  border-color: #8c1d18;
+}
+
+[data-theme="samurai"] .bubble .line2 {
+  color: #6b5a44;
+}
+
+[data-theme="samurai"] button {
+  background: #2a1d14;
+  border-color: #b8923f;
+  color: #f1e6d0;
+}
+
+/* Theme picker, top-right corner. Uses the page tokens so every theme restyles it. */
+.theme-picker {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  font-size: 12px;
+  color: var(--muted);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.theme-picker select {
+  font: inherit;
+  font-size: 13px;
+  color: var(--fg);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 3px 6px;
+  cursor: pointer;
+}
+
+@media (max-width: 900px) {
+  .theme-picker {
+    top: auto;
+    bottom: 70px;
+    right: 12px;
+  }
+}
+
+/* Isan farmer theme: old sepia photograph, enamel signs and wood. */
+[data-theme="isan"] {
+  --bg: #1c140d;
+  --fg: #f1e3c3;
+  --muted: #b39a74;
+  --panel: rgba(52, 36, 22, 0.9);
+  --border: #a9824a;
+  --done: #8fc77a;
+  --sa: #7aa8e6;
+  --dev: #ea7a52;
+  --tester: #e6bb48;
+  --summary: #dd7bb4;
+  --bubble-bg: #f4e7c4;
+  --bubble-fg: #2b1d10;
+  font-family: "Leelawadee UI", "Tahoma", "TH Sarabun New", sans-serif;
+}
+
+/* Sepia grade and a warm cast over the whole 3D view. */
+[data-theme="isan"] #scene canvas {
+  filter: sepia(0.5) saturate(0.9) contrast(1.06) brightness(1.02);
+}
+
+/* Film grain and vignette sit above the canvas but below the labels and panels. */
+[data-theme="isan"]::after {
+  content: "";
+  position: fixed;
+  inset: -50px;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse at center, rgba(0, 0, 0, 0) 52%, rgba(35, 18, 4, 0.6) 100%),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.35  0 0 0 0 0.25  0 0 0 0 0.12  0 0 0 0.55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  mix-blend-mode: multiply;
+  opacity: 0.55;
+  animation: isan-grain 0.7s steps(5) infinite;
+}
+
+@keyframes isan-grain {
+  0% { transform: translate(0, 0); }
+  20% { transform: translate(-12px, 8px); }
+  40% { transform: translate(10px, -14px); }
+  60% { transform: translate(-8px, -6px); }
+  80% { transform: translate(14px, 10px); }
+  100% { transform: translate(0, 0); }
+}
+
+[data-theme="isan"] #pipeline,
+[data-theme="isan"] #hud,
+[data-theme="isan"] .theme-picker {
+  border-color: #a9824a;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5), 0 6px 18px rgba(0, 0, 0, 0.45);
+}
+
+[data-theme="isan"] .tag {
+  background: rgba(44, 30, 18, 0.92);
+  color: #f1e3c3;
+}
+
+[data-theme="isan"] .tag.lead {
+  background: #3a2a52;
+  color: #f6e3b4;
+  border-color: #c9a45c;
+}
+
+[data-theme="isan"] .bubble {
+  border-color: #7a4a22;
+}
+
+[data-theme="isan"] .bubble .line2 {
+  color: #6f5a3e;
+}
+
+[data-theme="isan"] button {
+  background: #3a2815;
+  border-color: #a9824a;
+  color: #f1e3c3;
+}
+
+/* The Isan scene is framed wider, so the name tags need to be more compact. */
+[data-theme="isan"] .tag {
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 5px;
+}
